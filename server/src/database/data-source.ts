@@ -1,5 +1,7 @@
 import {DataSource} from "typeorm"
 import * as dotenv from "dotenv"
+import { CreateUsersTable1679828897580 } from "./migrations/1679828897580-CreateUsersTable"
+import { UserEntity } from "./entities/UserEntity"
 
 dotenv.config()
 
@@ -16,6 +18,9 @@ export const AppDataSource = new DataSource({
     logging: true,
     subscribers: [],
     entities: [
-        
+        UserEntity
     ],
+    migrations: [
+        CreateUsersTable1679828897580,
+    ]
 })

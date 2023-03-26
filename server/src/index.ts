@@ -1,3 +1,4 @@
+import "reflect-metadata";
 import configureApp from "./app";
 import * as dotenv from "dotenv";
 import { AppDataSource } from "./database/data-source";

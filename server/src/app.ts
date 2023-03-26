@@ -2,6 +2,7 @@ import express, { Application } from "express";
 import bodyParser from "body-parser";
 import cors from "cors";
 import morgan from "morgan";
+import usersRouter from "./routers/usersRouter";
 
 
 export default function configureApp() {
@@ -14,6 +15,9 @@ export default function configureApp() {
     app.use(bodyParser.json()); //  parses incoming requests with JSON payloads
 
     // end middlewares
+
+    // Region Routes
+    app.use("/users", usersRouter)
 
     app.get("/hello", (req, res, next) => {
 
