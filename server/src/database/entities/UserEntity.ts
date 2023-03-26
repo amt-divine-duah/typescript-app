@@ -5,7 +5,7 @@ import { DBTable } from "../../constants/DBTable"
 export class UserEntity {
 
     @PrimaryGeneratedColumn("uuid")
-    id: number
+    id: string
 
     @Column({unique: true})
     username: string
