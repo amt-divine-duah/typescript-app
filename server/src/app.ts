@@ -1,31 +1,37 @@
-import express, { Application } from "express";
+import express, { Application, NextFunction, Request, Response } from "express";
 import bodyParser from "body-parser";
 import cors from "cors";
 import morgan from "morgan";
 import usersRouter from "./routers/usersRouter";
+import { ReasonPhrases, StatusCodes } from "http-status-codes";
+import { ResponseUtil } from "./utils/Response";
+import { ErrorHandler } from "./middlewares/ErrorHandler";
 
 
 export default function configureApp() {
+  const app: Application = express();
 
-    const app: Application = express();
+  // region middlewares
+  app.use(cors()); // Enable cors (Cross-Origin Resource Sharing (CORS))
+  app.use(morgan("dev")); // print in the dev console, all requests coming intoo the app
+  app.use(bodyParser.json()); //  parses incoming requests with JSON payloads
 
-    // region middlewares
-    app.use(cors()); // Enable cors (Cross-Origin Resource Sharing (CORS))
-    app.use(morgan("dev"));  // print in the dev console, all requests coming intoo the app
-    app.use(bodyParser.json()); //  parses incoming requests with JSON payloads
+  // end middlewares
 
-    // end middlewares
+  // Region Routes
+  app.use("/users", usersRouter);
 
-    // Region Routes
-    app.use("/users", usersRouter)
+  app.use("*", (req: Request, res: Response) => {
+    return ResponseUtil.sendError(
+      res,
+      "Item/page you are looking for does not exist",
+      StatusCodes.NOT_FOUND,
+      ReasonPhrases.NOT_FOUND
+    );
+  });
 
-    app.get("/hello", (req, res, next) => {
+  // Define a middleware function to handle errors
+  app.use(ErrorHandler.handleErrors);
 
-        return res.status(200).json({
-            message: "Hello World"
-        })
-    })
-
-
-    return app
+  return app;
 }
