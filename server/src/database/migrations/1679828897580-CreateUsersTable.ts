@@ -31,6 +31,12 @@ export class CreateUsersTable1679828897580 implements MigrationInterface {
                         isUnique: true,
                     },
                     {
+                        name: "password",
+                        type: "varchar",
+                        length: "255",
+                        isNullable: false,
+                    },
+                    {
                         name: "createdAt",
                         type: "timestamp",
                         default: "now()",

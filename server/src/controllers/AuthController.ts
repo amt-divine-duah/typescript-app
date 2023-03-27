@@ -20,8 +20,9 @@ export class AuthContoller {
         })
 
         // Save user Data
+        const {username, email, password} = registerData
         const userRepo = AppDataSource.getRepository(UserEntity)
-        const user = userRepo.create(registerData)
+        const user = userRepo.create({username, email, password})
         await userRepo.save(user)
         
         return ResponseUtil.sendResponse(res, "Registration was successful", user, StatusCodes.CREATED)

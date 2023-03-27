@@ -14,4 +14,7 @@ usersRouter.get("/", ErrorHandler.catchErrors(usersController.getUsers));
 // Get a user
 usersRouter.get("/:id", ErrorHandler.catchErrors(usersController.getUser));
 
+// Update user details
+usersRouter.put("/:id", ErrorHandler.catchErrors(usersController.updateUser));
+
 export default usersRouter;

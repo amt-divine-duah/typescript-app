@@ -15,6 +15,7 @@ AppDataSource.initialize()
           const user = transactionalEntityManager.create(UserEntity, {
             username: faker.name.firstName(),
             email: faker.internet.email(),
+            password: faker.internet.password()
           });
           await transactionalEntityManager.save(user);
         });

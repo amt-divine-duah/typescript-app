@@ -4,6 +4,7 @@ import { UserEntity } from "../database/entities/UserEntity";
 import { ResponseUtil } from "../utils/Response";
 import { Paginator } from "../utils/Paginator";
 import { StatusCodes } from "http-status-codes";
+import { updateUserSchema } from "../dtos/UserDTO";
 
 export class UsersController {
   // Get users
@@ -28,5 +29,35 @@ export class UsersController {
     });
 
     return ResponseUtil.sendResponse(res, "User fetched successfully", user);
+  }
+
+  // Update user details
+  async updateUser(req: Request, res: Response, next: NextFunction) {
+    // Get the user id from the request
+    const id = req.params.id;
+    const userData = req.body;
+
+    // Check if user exists
+    const userRepo = AppDataSource.getRepository(UserEntity)
+    const user = await userRepo.findOneByOrFail({
+      id: id,
+    })
+
+    // Add the id to userData
+    userData.id = id
+
+    // Perform validations on userData
+    await updateUserSchema.validateAsync(userData, {
+      abortEarly: false,
+      errors: { label: "key", wrap: { label: false } },
+    });
+
+    
+
+    userRepo.merge(user, userData)
+    await userRepo.save(user)
+
+
+    return ResponseUtil.sendResponse(res, "User Updated successfully", user, StatusCodes.OK);
   }
 }

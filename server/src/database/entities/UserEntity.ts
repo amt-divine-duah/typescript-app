@@ -1,5 +1,6 @@
-import {Column, Entity, PrimaryGeneratedColumn, CreateDateColumn} from "typeorm"
+import {Column, Entity, PrimaryGeneratedColumn, CreateDateColumn, BeforeInsert} from "typeorm"
 import { DBTable } from "../../constants/DBTable"
+import { hash } from "bcryptjs"
 
 @Entity(DBTable.USERS)
 export class UserEntity {
@@ -13,6 +14,14 @@ export class UserEntity {
     @Column({unique: true})
     email: string
 
+    @Column({nullable: false})
+    password: string
+
     @CreateDateColumn()
     createdAt: Date
+
+    @BeforeInsert()
+    async hashPassword() {
+        this.password = await hash(this.password, 12)
+    }
 }
