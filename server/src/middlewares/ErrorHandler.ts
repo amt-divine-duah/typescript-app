@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import { EntityNotFoundError } from "typeorm";
 import { ResponseUtil } from "../utils/Response";
 import { ReasonPhrases, StatusCodes } from "http-status-codes";
+import Joi from "joi";
 
 export class ErrorHandler {
   // Create a wrapper to handle errors
@@ -22,6 +23,12 @@ export class ErrorHandler {
       );
     }
 
+    // Validation Errors
+    if (err.details && Array.isArray(err.details)) {
+      const errors = ErrorHandler.formatErrors(err.details);
+      return ResponseUtil.sendError(res, ReasonPhrases.UNPROCESSABLE_ENTITY, StatusCodes.UNPROCESSABLE_ENTITY, errors);
+    }
+
     // any other error
     return ResponseUtil.sendError(
       res,
@@ -29,5 +36,18 @@ export class ErrorHandler {
       StatusCodes.INTERNAL_SERVER_ERROR,
       ReasonPhrases.INTERNAL_SERVER_ERROR
     );
+  }
+
+  // format errors
+  static formatErrors(details: Joi.ValidationErrorItem[]) {
+    const errors = {};
+    details.forEach((d) => {
+      const key = d.path.join(".");
+      if (!errors[key]) {
+        errors[key] = [];
+      }
+      errors[key].push(d.message);
+    });
+    return errors;
   }
 }

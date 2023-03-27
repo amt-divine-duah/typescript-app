@@ -6,6 +6,7 @@ import usersRouter from "./routers/usersRouter";
 import { ReasonPhrases, StatusCodes } from "http-status-codes";
 import { ResponseUtil } from "./utils/Response";
 import { ErrorHandler } from "./middlewares/ErrorHandler";
+import authRouter from "./routers/authRouter";
 
 
 export default function configureApp() {
@@ -20,6 +21,7 @@ export default function configureApp() {
 
   // Region Routes
   app.use("/users", usersRouter);
+  app.use("/auth", authRouter)
 
   app.use("*", (req: Request, res: Response) => {
     return ResponseUtil.sendError(
