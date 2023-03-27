@@ -15,7 +15,8 @@ export class AuthContoller {
 
         // Perform validations
         await registerSchema.validateAsync(registerData, {
-            abortEarly: false
+            abortEarly: false,
+            errors: {label: "key", wrap:{label: false}}
         })
 
         // Save user Data
