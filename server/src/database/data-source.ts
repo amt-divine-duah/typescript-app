@@ -2,6 +2,9 @@ import {DataSource} from "typeorm"
 import * as dotenv from "dotenv"
 import { CreateUsersTable1679828897580 } from "./migrations/1679828897580-CreateUsersTable"
 import { UserEntity } from "./entities/UserEntity"
+import { CreateRolesTable1679946949469 } from "./migrations/1679946949469-CreateRolesTable"
+import { RoleEntity } from "./entities/RoleEntity"
+import { CreateTokensTable1679977778839 } from "./migrations/1679977778839-CreateTokensTable"
 
 dotenv.config()
 
@@ -18,9 +21,12 @@ export const AppDataSource = new DataSource({
     logging: true,
     subscribers: [],
     entities: [
-        UserEntity
+        UserEntity,
+        RoleEntity
     ],
     migrations: [
         CreateUsersTable1679828897580,
+        CreateRolesTable1679946949469,
+        CreateTokensTable1679977778839
     ]
 })

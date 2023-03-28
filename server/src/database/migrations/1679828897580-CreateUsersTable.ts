@@ -1,4 +1,4 @@
-import { MigrationInterface, QueryRunner, Table } from "typeorm"
+import { MigrationInterface, QueryRunner, Table, TableForeignKey } from "typeorm"
 import { DBTable } from "../../constants/DBTable"
 
 export class CreateUsersTable1679828897580 implements MigrationInterface {
@@ -37,6 +37,17 @@ export class CreateUsersTable1679828897580 implements MigrationInterface {
                         isNullable: false,
                     },
                     {
+                        name: "roleId",
+                        type: "int",
+                        isNullable: false
+                    },
+                    {
+                        name: "confirmed",
+                        type: "boolean",
+                        isNullable: false,
+                        default: false
+                    },
+                    {
                         name: "createdAt",
                         type: "timestamp",
                         default: "now()",
@@ -45,6 +56,16 @@ export class CreateUsersTable1679828897580 implements MigrationInterface {
                 ]
             }), 
             true
+        )
+
+        await queryRunner.createForeignKey(
+            DBTable.USERS,
+            new TableForeignKey({
+                columnNames: ["roleId"],
+                referencedTableName: DBTable.ROLES,
+                referencedColumnNames: ["id"],
+                onDelete: "SET NULL"
+            })
         )
     }
 

@@ -1,3 +1,5 @@
 export enum DBTable {
-    USERS = "users"
+    USERS = "users",
+    ROLES = "roles",
+    TOKENS = "tokens"
 }
