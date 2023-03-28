@@ -14,7 +14,11 @@ export class UsersController {
 
     const { records: users, paginationInfo } = await Paginator.paginate(queryBuilder, req);
 
-    return ResponseUtil.sendResponse(res, "Users fetched successfully", users, StatusCodes.OK, paginationInfo);
+    const usersData = users.map((user) => {
+      return user.toResponse();
+    });
+    
+    return ResponseUtil.sendResponse(res, "Users fetched successfully", usersData, StatusCodes.OK, paginationInfo);
   }
 
   // Get a user
@@ -28,7 +32,7 @@ export class UsersController {
       id: id,
     });
 
-    return ResponseUtil.sendResponse(res, "User fetched successfully", user);
+    return ResponseUtil.sendResponse(res, "User fetched successfully", { ...user.toResponse() });
   }
 
   // Update user details
@@ -38,13 +42,13 @@ export class UsersController {
     const userData = req.body;
 
     // Check if user exists
-    const userRepo = AppDataSource.getRepository(UserEntity)
+    const userRepo = AppDataSource.getRepository(UserEntity);
     const user = await userRepo.findOneByOrFail({
       id: id,
-    })
+    });
 
     // Add the id to userData
-    userData.id = id
+    userData.id = id;
 
     // Perform validations on userData
     await updateUserSchema.validateAsync(userData, {
@@ -52,12 +56,9 @@ export class UsersController {
       errors: { label: "key", wrap: { label: false } },
     });
 
-    
+    userRepo.merge(user, userData);
+    await userRepo.save(user);
 
-    userRepo.merge(user, userData)
-    await userRepo.save(user)
-
-
-    return ResponseUtil.sendResponse(res, "User Updated successfully", user, StatusCodes.OK);
+    return ResponseUtil.sendResponse(res, "User Updated successfully", { ...user.toResponse() }, StatusCodes.OK);
   }
 }

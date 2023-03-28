@@ -5,6 +5,8 @@ import { AppDataSource } from "../database/data-source";
 import { UserEntity } from "../database/entities/UserEntity";
 import { ReasonPhrases, StatusCodes } from "http-status-codes";
 import { compare } from "bcryptjs";
+import { TokenEntity } from "../database/entities/TokenEntity";
+import { GeneralUtils } from "../utils/GeneralUtils";
 
 export class AuthContoller {
   // Register users
@@ -24,7 +26,7 @@ export class AuthContoller {
     const user = userRepo.create({ username, email, password });
     await userRepo.save(user);
 
-    return ResponseUtil.sendResponse(res, "Registration was successful", user, StatusCodes.CREATED);
+    return ResponseUtil.sendResponse(res, "Registration was successful", { ...user.toResponse() }, StatusCodes.CREATED);
   }
 
   // Login User
@@ -57,14 +59,40 @@ export class AuthContoller {
 
     // If account is not confirmed
     if (!user.confirmed) {
-        return ResponseUtil.sendError(
-            res,
-            "Please confirm your account and try again",
-            StatusCodes.BAD_REQUEST,
-            ReasonPhrases.BAD_REQUEST
-          );
+      return ResponseUtil.sendError(
+        res,
+        "Please confirm your account and try again",
+        StatusCodes.BAD_REQUEST,
+        ReasonPhrases.BAD_REQUEST
+      );
     }
-    // TODO: Generate auth token for user
-    return ResponseUtil.sendResponse(res, "User logged in successfully", user);
+    // Generate token and Get the expiration Time
+    const token = GeneralUtils.generateAuthToken(user);
+    const decoded = GeneralUtils.getTokenExpiration(token.accessToken);
+
+    if (typeof decoded === "undefined") {
+      return ResponseUtil.sendError(
+        res,
+        "Something went wrong",
+        StatusCodes.INTERNAL_SERVER_ERROR,
+        ReasonPhrases.INTERNAL_SERVER_ERROR
+      );
+    }
+
+    const tokenRepo = AppDataSource.getRepository(TokenEntity);
+    // CReate a new Token instance
+    const newToken = tokenRepo.create({
+      user: user,
+      tokenExpiration: new Date(decoded * 1000),
+      token: token.accessToken,
+    });
+    await tokenRepo.save(newToken);
+
+    const response = {
+      ...user.toResponse(),
+      ...token,
+    };
+    
+    return ResponseUtil.sendResponse(res, "User logged in successfully", response);
   }
 }

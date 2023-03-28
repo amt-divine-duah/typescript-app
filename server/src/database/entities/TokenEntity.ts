@@ -1,5 +1,6 @@
-import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn } from "typeorm"
+import { Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm"
 import { DBTable } from "../../constants/DBTable"
+import { UserEntity } from "./UserEntity"
 
 @Entity(DBTable.TOKENS)
 export class TokenEntity {
@@ -15,4 +16,8 @@ export class TokenEntity {
 
     @CreateDateColumn()
     createdAt: Date
+
+    @ManyToOne(() => UserEntity, (user) => user.tokens)
+    user: UserEntity
+
 }
