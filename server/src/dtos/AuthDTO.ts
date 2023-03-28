@@ -21,6 +21,9 @@ export const registerSchema = Joi.object({
 
 // Login Schema
 export const loginSchema = Joi.object({
-  username: Joi.string().required(),
   email: Joi.string().email().required(),
+  password: Joi.string()
+  .pattern(new RegExp("^[a-zA-Z0-9]{3,30}$"))
+  .required()
+  .messages({ "string.pattern.base": "Password must be alphanumeric and between 3 - 30 characters long" }),
 });

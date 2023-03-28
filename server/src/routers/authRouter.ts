@@ -13,5 +13,7 @@ const authRouter = Router();
 // register route
 authRouter.post("/register", ErrorHandler.catchErrors(authController.register));
 
+// login route
+authRouter.post("/login", ErrorHandler.catchErrors(authController.login))
 
 export default authRouter

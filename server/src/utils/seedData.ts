@@ -1,6 +1,6 @@
+import { AppDataSource } from "../database/data-source";
 import { faker } from "@faker-js/faker";
 import { UserEntity } from "../database/entities/UserEntity";
-import { AppDataSource } from "../database/data-source";
 
 
 AppDataSource.initialize()
