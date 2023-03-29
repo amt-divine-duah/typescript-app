@@ -10,6 +10,7 @@ import { GeneralUtils } from "../utils/GeneralUtils";
 import configValues from "../config/config";
 import { confirmAccountTemplate } from "../templates/confirmAccount";
 import { MailService } from "../services/mailService";
+import { TokenType } from "../constants/TokenType";
 
 export class AuthContoller {
   // Register users
@@ -28,22 +29,22 @@ export class AuthContoller {
     const userRepo = AppDataSource.getRepository(UserEntity);
     const user = userRepo.create({ username, email, password });
     await userRepo.save(user);
-    
+
     // Generate confirmationToken
-    const token = GeneralUtils.generateConfirmationToken(user)
+    const token = GeneralUtils.generateConfirmationToken(user);
 
     // Create verificationUrl
-    const verificationUrl = configValues.ACCOUNT_CONFIRMATION_URL + "/" + token.accessToken
-    
+    const verificationUrl = configValues.ACCOUNT_CONFIRMATION_URL + "/" + token.accessToken;
+
     // Create Email
-    const htmlTemplate = confirmAccountTemplate(user.username, verificationUrl)
+    const htmlTemplate = confirmAccountTemplate(user.username, verificationUrl);
     // Send Email
     MailService.sendEmail({
       from: configValues.MAIL_DEFAULT_SENDER,
       to: user.email,
       html: htmlTemplate.html,
-      subject: "Confirm Your account"
-    })
+      subject: "Confirm Your account",
+    });
 
     return ResponseUtil.sendResponse(res, "Registration was successful", { ...user.toResponse() }, StatusCodes.CREATED);
   }
@@ -111,7 +112,46 @@ export class AuthContoller {
       ...user.toResponse(),
       ...token,
     };
-    
+
     return ResponseUtil.sendResponse(res, "User logged in successfully", response);
+  }
+
+  // Confirm account
+  async confirm(req: Request, res: Response, next: NextFunction) {
+    // Get the token from the request
+    const { token } = req.params;
+
+    // Verify the token
+    const payload = GeneralUtils.validateJWT(token);
+
+    if (!payload) {
+      return ResponseUtil.sendError(
+        res,
+        "Invalid or expired Token",
+        StatusCodes.BAD_REQUEST,
+        ReasonPhrases.BAD_REQUEST
+      );
+    }
+
+    // Check for the token type
+    if (payload["tokenType"] !== TokenType.CONFIRM_ACCOUNT || !payload["id"]) {
+      return ResponseUtil.sendError(res, "Invalid Request", StatusCodes.BAD_REQUEST, ReasonPhrases.BAD_REQUEST)
+    }
+
+    // Get the user and confirm their account
+    const userRepo = AppDataSource.getRepository(UserEntity)
+    const user = await userRepo.findOneByOrFail({
+      id: payload["id"]
+    })
+    
+    if (user.confirmed) {
+      return ResponseUtil.sendResponse(res, "User is already verified", null)
+    }
+
+    // confirm the account
+    user.confirmed = true
+    await userRepo.save(user)
+
+    return ResponseUtil.sendResponse(res, "Account confirmed successfully", null);
   }
 }

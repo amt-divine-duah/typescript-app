@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import { ResponseUtil } from "../utils/Response";
 import { ReasonPhrases, StatusCodes } from "http-status-codes";
 import { GeneralUtils } from "../utils/GeneralUtils";
+import { TokenType } from "../constants/TokenType";
 
 export class AuthMiddleware {
   // Authenticate users
@@ -28,7 +29,7 @@ export class AuthMiddleware {
       }
 
       // Check for payload token Type
-      if (payload["tokenType"] !== "user_access") {
+      if (payload["tokenType"] !== TokenType.USER_AUTH) {
         return ResponseUtil.sendError(
           res,
           "Invalid Authorization Header",

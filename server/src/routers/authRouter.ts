@@ -16,4 +16,7 @@ authRouter.post("/register", ErrorHandler.catchErrors(authController.register));
 // login route
 authRouter.post("/login", ErrorHandler.catchErrors(authController.login))
 
+// confirm Account
+authRouter.get("/confirmAccount/:token", ErrorHandler.catchErrors(authController.confirm)) 
+
 export default authRouter

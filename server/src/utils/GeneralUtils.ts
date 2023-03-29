@@ -4,6 +4,7 @@ import { AppDataSource } from "../database/data-source"
 import { RoleEntity } from "../database/entities/RoleEntity"
 import jwt from "jsonwebtoken";
 import { UserEntity } from "../database/entities/UserEntity";
+import { TokenType } from "../constants/TokenType";
 
 export class GeneralUtils {
 
@@ -32,7 +33,7 @@ export class GeneralUtils {
         const accessToken = this.generateJWT(
             {
                 id: user.id,
-                tokenType: "user_access"
+                tokenType: TokenType.USER_AUTH
             }
         )
         return {
@@ -45,7 +46,7 @@ export class GeneralUtils {
         const accessToken = this.generateJWT(
             {
                 id: user.id,
-                tokenType: "user_confirm_account"
+                tokenType: TokenType.CONFIRM_ACCOUNT
             }
         )
         return {
