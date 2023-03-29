@@ -50,4 +50,14 @@ export class GeneralUtils {
         }
         throw new Error("Token does not contain expiration")
     }
+
+    // Validate JWT TOKEN
+    static validateJWT(token: string) {
+        try {
+            return jwt.verify(token, configValues.SECRET_KEY)
+        } catch (error) {
+            console.log(error)
+            return false
+        }
+    }
 }
