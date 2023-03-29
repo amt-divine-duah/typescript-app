@@ -7,6 +7,9 @@ import { ReasonPhrases, StatusCodes } from "http-status-codes";
 import { compare } from "bcryptjs";
 import { TokenEntity } from "../database/entities/TokenEntity";
 import { GeneralUtils } from "../utils/GeneralUtils";
+import configValues from "../config/config";
+import { confirmAccountTemplate } from "../templates/confirmAccount";
+import { MailService } from "../services/mailService";
 
 export class AuthContoller {
   // Register users
@@ -25,6 +28,22 @@ export class AuthContoller {
     const userRepo = AppDataSource.getRepository(UserEntity);
     const user = userRepo.create({ username, email, password });
     await userRepo.save(user);
+    
+    // Generate confirmationToken
+    const token = GeneralUtils.generateConfirmationToken(user)
+
+    // Create verificationUrl
+    const verificationUrl = configValues.ACCOUNT_CONFIRMATION_URL + "/" + token.accessToken
+    
+    // Create Email
+    const htmlTemplate = confirmAccountTemplate(user.username, verificationUrl)
+    // Send Email
+    MailService.sendEmail({
+      from: configValues.MAIL_DEFAULT_SENDER,
+      to: user.email,
+      html: htmlTemplate.html,
+      subject: "Confirm Your account"
+    })
 
     return ResponseUtil.sendResponse(res, "Registration was successful", { ...user.toResponse() }, StatusCodes.CREATED);
   }

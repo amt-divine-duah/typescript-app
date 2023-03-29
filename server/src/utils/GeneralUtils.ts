@@ -40,6 +40,19 @@ export class GeneralUtils {
         }
     }
 
+    // Generate confirmation Token
+    static generateConfirmationToken(user: UserEntity) {
+        const accessToken = this.generateJWT(
+            {
+                id: user.id,
+                tokenType: "user_confirm_account"
+            }
+        )
+        return {
+            "accessToken": accessToken
+        }
+    }
+
     // Get token Expiration Time
     static getTokenExpiration(token: string) {
 
