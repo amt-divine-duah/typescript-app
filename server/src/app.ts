@@ -7,6 +7,7 @@ import { ReasonPhrases, StatusCodes } from "http-status-codes";
 import { ResponseUtil } from "./utils/Response";
 import { ErrorHandler } from "./middlewares/ErrorHandler";
 import authRouter from "./routers/authRouter";
+import serverAdapter from "./config/bullBoardConfig";
 
 
 export default function configureApp() {
@@ -22,6 +23,7 @@ export default function configureApp() {
   // Region Routes
   app.use("/users", usersRouter);
   app.use("/auth", authRouter)
+  app.use("/admin", serverAdapter.getRouter())
 
   app.use("*", (req: Request, res: Response) => {
     return ResponseUtil.sendError(

@@ -11,6 +11,8 @@ import configValues from "../config/config";
 import { confirmAccountTemplate } from "../templates/confirmAccount";
 import { MailService } from "../services/mailService";
 import { TokenType } from "../constants/TokenType";
+import { SendMailJob, } from "../config/bullConfig";
+import { QUEUE_NAME } from "../constants/helpers";
 
 export class AuthContoller {
   // Register users
@@ -37,14 +39,22 @@ export class AuthContoller {
     const verificationUrl = configValues.ACCOUNT_CONFIRMATION_URL + "/" + token.accessToken;
 
     // Create Email
-    const htmlTemplate = confirmAccountTemplate(user.username, verificationUrl);
+    const { html } = confirmAccountTemplate(user.username, verificationUrl);
+    const senderEmail = configValues.MAIL_DEFAULT_SENDER
+    const userEmail = user.email
     // Send Email
-    MailService.sendEmail({
-      from: configValues.MAIL_DEFAULT_SENDER,
-      to: user.email,
-      html: htmlTemplate.html,
-      subject: "Confirm Your account",
-    });
+    const data = {senderEmail, userEmail, html}
+
+    await SendMailJob({
+      type: QUEUE_NAME.EMAIL_CONFIRMATION_QUEUE,
+      data
+    })
+    // MailService.sendEmail({
+    //   from: configValues.MAIL_DEFAULT_SENDER,
+    //   to: user.email,
+    //   html: htmlTemplate.html,
+    //   subject: "Confirm Your account",
+    // });
 
     return ResponseUtil.sendResponse(res, "Registration was successful", { ...user.toResponse() }, StatusCodes.CREATED);
   }
