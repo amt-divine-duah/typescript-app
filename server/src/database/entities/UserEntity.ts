@@ -1,4 +1,13 @@
-import { Column, Entity, PrimaryGeneratedColumn, CreateDateColumn, BeforeInsert, ManyToOne, JoinColumn, OneToMany } from "typeorm";
+import {
+  Column,
+  Entity,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+  BeforeInsert,
+  ManyToOne,
+  JoinColumn,
+  OneToMany,
+} from "typeorm";
 import { DBTable } from "../../constants/DBTable";
 import { hash } from "bcryptjs";
 import { RoleEntity } from "./RoleEntity";
@@ -7,7 +16,6 @@ import { TokenEntity } from "./TokenEntity";
 
 @Entity(DBTable.USERS)
 export class UserEntity {
-    
   // Constructor to initialize default role if none is given
   constructor(partial: Partial<UserEntity>) {
     Object.assign(this, partial);
@@ -41,7 +49,7 @@ export class UserEntity {
   role: RoleEntity | null;
 
   @OneToMany(() => TokenEntity, (token) => token.user)
-  tokens: TokenEntity[]
+  tokens: TokenEntity[];
 
   @BeforeInsert()
   async hashPassword() {
@@ -49,11 +57,11 @@ export class UserEntity {
   }
 
   toResponse() {
-    const {id, username, email} = this
+    const { id, username, email } = this;
     return {
       id,
       username,
-      email
-    }
+      email,
+    };
   }
 }

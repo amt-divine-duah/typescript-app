@@ -5,6 +5,7 @@ import { ResponseUtil } from "../utils/Response";
 import { Paginator } from "../utils/Paginator";
 import { StatusCodes } from "http-status-codes";
 import { updateUserSchema } from "../dtos/UserDTO";
+import { hash } from "bcryptjs";
 
 export class UsersController {
   // Get users
@@ -55,6 +56,11 @@ export class UsersController {
       abortEarly: false,
       errors: { label: "key", wrap: { label: false } },
     });
+
+    // If password is provided, hash the password
+    if (userData.password) {
+      userData.password = await hash(userData.password, 12)
+    }
 
     userRepo.merge(user, userData);
     await userRepo.save(user);
