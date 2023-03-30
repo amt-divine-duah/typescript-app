@@ -32,3 +32,12 @@ export const loginSchema = Joi.object({
 export const forgotPasswordSchema = Joi.object({
   email: Joi.string().email().required(),
 });
+
+// Reset password
+export const resetPasswordSchema = Joi.object({
+  email: Joi.string().email().required(),
+  password: Joi.string()
+  .pattern(new RegExp("^[a-zA-Z0-9]{3,30}$"))
+  .required()
+  .messages({ "string.pattern.base": "Password must be alphanumeric and between 3 - 30 characters long" }),
+});

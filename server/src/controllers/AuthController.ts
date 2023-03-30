@@ -1,10 +1,10 @@
 import { Request, Response, NextFunction } from "express";
 import { ResponseUtil } from "../utils/Response";
-import { forgotPasswordSchema, loginSchema, registerSchema } from "../dtos/AuthDTO";
+import { forgotPasswordSchema, loginSchema, registerSchema, resetPasswordSchema } from "../dtos/AuthDTO";
 import { AppDataSource } from "../database/data-source";
 import { UserEntity } from "../database/entities/UserEntity";
 import { ReasonPhrases, StatusCodes } from "http-status-codes";
-import { compare } from "bcryptjs";
+import { compare, hash } from "bcryptjs";
 import { TokenEntity } from "../database/entities/TokenEntity";
 import { GeneralUtils } from "../utils/GeneralUtils";
 import configValues from "../config/config";
@@ -41,7 +41,7 @@ export class AuthContoller {
     const { html } = confirmAccountTemplate(user.username, verificationUrl);
     const senderEmail = configValues.MAIL_DEFAULT_SENDER;
     const userEmail = user.email;
-    const subject = "Confirm Your Account"
+    const subject = "Confirm Your Account";
 
     const data = { senderEmail, userEmail, html, subject };
 
@@ -192,17 +192,17 @@ export class AuthContoller {
       );
     }
 
-    // Generate Token 
-    const token = GeneralUtils.generatePasswordResetToken(user)
+    // Generate Token
+    const token = GeneralUtils.generatePasswordResetToken(user);
     // password reset url
-    const passwordResetURL = configValues.PASSWORD_RESET_URL + "/" + token.accessToken
+    const passwordResetURL = configValues.PASSWORD_RESET_URL + "/" + token.accessToken;
 
     // Create email
-    const { html } = forgotPasswordTemplate(user.username, passwordResetURL)
+    const { html } = forgotPasswordTemplate(user.username, passwordResetURL);
 
     const senderEmail = configValues.MAIL_DEFAULT_SENDER;
     const userEmail = user.email;
-    const subject = "Reset Password Request"
+    const subject = "Reset Password Request";
 
     const data = { senderEmail, userEmail, html, subject };
 
@@ -218,5 +218,88 @@ export class AuthContoller {
       null,
       StatusCodes.OK
     );
+  }
+
+  // verify password reset request
+  async verifyPasswordResetRequest(req: Request, res: Response, next: NextFunction) {
+    // Get token from the request
+    const { token } = req.params;
+
+    // Verify token
+    const payload = GeneralUtils.validateJWT(token);
+
+    if (!payload) {
+      return ResponseUtil.sendError(
+        res,
+        "Invalid or expired token",
+        StatusCodes.BAD_REQUEST,
+        ReasonPhrases.BAD_REQUEST
+      );
+    }
+
+    if (payload["tokenType"] !== TokenType.FORGOT_PASSWORD || !payload["id"]) {
+      return ResponseUtil.sendError(res, "Invalid Request", StatusCodes.BAD_REQUEST, ReasonPhrases.BAD_REQUEST);
+    }
+
+    return ResponseUtil.sendResponse(res, "You can now reset your password", null);
+  }
+
+  // reset password
+  async resetPassword(req: Request, res: Response, next: NextFunction) {
+    // Get the userData
+    const userData = req.body;
+    // Get the token
+    const { token } = req.params;
+
+    // Verify token
+    const payload = GeneralUtils.validateJWT(token);
+
+    if (!payload) {
+      return ResponseUtil.sendError(
+        res,
+        "Invalid or expired token",
+        StatusCodes.BAD_REQUEST,
+        ReasonPhrases.BAD_REQUEST
+      );
+    }
+
+    if (payload["tokenType"] !== TokenType.FORGOT_PASSWORD || !payload["id"]) {
+      return ResponseUtil.sendError(res, "Invalid Request", StatusCodes.BAD_REQUEST, ReasonPhrases.BAD_REQUEST);
+    }
+
+    // validate the data
+    await resetPasswordSchema.validateAsync(userData, {
+      abortEarly: false,
+      errors: { label: "key", wrap: { label: false } },
+    });
+
+    // CHeck if email is valid
+    const userRepo = AppDataSource.getRepository(UserEntity);
+    const user = await userRepo.findOneByOrFail({
+      email: userData.email,
+    });
+
+    // Is user Verified
+    if (!user.confirmed) {
+      return ResponseUtil.sendError(
+        res,
+        "Please confirm your account",
+        StatusCodes.BAD_REQUEST,
+        ReasonPhrases.BAD_REQUEST
+      );
+    }
+
+    // Check if token id is same as user ID
+    if (payload["id"] !== user.id) {
+      return ResponseUtil.sendError(res, "Unauthorized Request", StatusCodes.FORBIDDEN, ReasonPhrases.FORBIDDEN);
+    }
+
+    // Hash password and update the user password
+    const hashedPassword = await hash(userData.password, 12);
+
+    user.password = hashedPassword;
+    await userRepo.save(user);
+
+    return ResponseUtil.sendResponse(res, "Password reset successful", null);
   }
 }
