@@ -19,4 +19,7 @@ authRouter.post("/login", ErrorHandler.catchErrors(authController.login))
 // confirm Account
 authRouter.get("/confirmAccount/:token", ErrorHandler.catchErrors(authController.confirm)) 
 
+// Forgot Password
+authRouter.post("/forgotPassword", ErrorHandler.catchErrors(authController.forgotPassword))
+
 export default authRouter

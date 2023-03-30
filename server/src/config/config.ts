@@ -27,6 +27,8 @@ const configValues = Object.freeze({
 
   // Account Confirmation Url
   ACCOUNT_CONFIRMATION_URL: process.env.ACCOUNT_CONFIRMATION_URL || "http://localhost:3001/auth/confirmAccount",
+  // Password Reset URL
+  PASSWORD_RESET_URL: process.env.PASSWORD_RESET_URL || "http://localhost:3001/auth/forgotPassword"
 
 
 });

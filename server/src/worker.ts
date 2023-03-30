@@ -1,17 +1,20 @@
 import {Worker} from "bullmq"
-import { sendConfirmationEmail } from "./utils/tasks"
+import { sendMail } from "./utils/tasks"
 import { QUEUE_NAME, redisOptions } from "./constants/helpers"
 
 const workerHandler = async (job) => {
     console.log("Starting job:", job.name)
-    sendConfirmationEmail(job.data)
+    sendMail(job.data)
     console.log("Finished Job: ", job.name)
     return;
 }
 
 
 
-const worker = new Worker(QUEUE_NAME.EMAIL_CONFIRMATION_QUEUE, workerHandler, {
+const worker = new Worker(QUEUE_NAME.EMAIL_QUEUE, workerHandler, {
     connection: redisOptions
 })
 
+worker.on("ready", () => {
+    console.log("Worker connected")
+})

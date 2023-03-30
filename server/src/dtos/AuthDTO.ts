@@ -27,3 +27,8 @@ export const loginSchema = Joi.object({
   .required()
   .messages({ "string.pattern.base": "Password must be alphanumeric and between 3 - 30 characters long" }),
 });
+
+// Forgot Password
+export const forgotPasswordSchema = Joi.object({
+  email: Joi.string().email().required(),
+});

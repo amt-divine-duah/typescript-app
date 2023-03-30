@@ -3,7 +3,7 @@ import { QUEUE_NAME, redisOptions } from "../constants/helpers"
 
 // Create a queuue instance
 export const sendMailQueue = new Queue(
-    QUEUE_NAME.EMAIL_CONFIRMATION_QUEUE,
+    QUEUE_NAME.EMAIL_QUEUE,
     {
         connection: redisOptions
     }

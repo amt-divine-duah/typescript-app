@@ -54,6 +54,19 @@ export class GeneralUtils {
         }
     }
 
+    // Generate password Reset Token
+    static generatePasswordResetToken(user: UserEntity) {
+        const accessToken = this.generateJWT(
+            {
+                id: user.id,
+                tokenType: TokenType.FORGOT_PASSWORD,
+            }
+        )
+        return {
+            "accessToken": accessToken
+        }
+    }
+
     // Get token Expiration Time
     static getTokenExpiration(token: string) {
 

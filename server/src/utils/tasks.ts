@@ -1,11 +1,11 @@
 import { MailService } from "../services/mailService";
 
-export function sendConfirmationEmail(job) {
+export function sendMail(job) {
   console.log("sending mail");
   MailService.sendEmail({
     from: job.data.senderEmail,
     to: job.data.userEmail,
-    subject: "Confirm Your Account",
+    subject: job.data.subject,
     html: job.data.html,
   });
 }
