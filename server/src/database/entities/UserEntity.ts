@@ -13,6 +13,7 @@ import { hash } from "bcryptjs";
 import { RoleEntity } from "./RoleEntity";
 import { GeneralUtils } from "../../utils/GeneralUtils";
 import { TokenEntity } from "./TokenEntity";
+import { AppDataSource } from "../data-source";
 
 @Entity(DBTable.USERS)
 export class UserEntity {
@@ -20,8 +21,10 @@ export class UserEntity {
   constructor(partial: Partial<UserEntity>) {
     Object.assign(this, partial);
     (async () => {
-      if (!this.role) {
-        this.role = await GeneralUtils.getDefaultRole();
+      if (AppDataSource.isInitialized) {
+        if (!this.role) {
+          this.role = await GeneralUtils.getDefaultRole();
+        }
       }
     })();
   }
